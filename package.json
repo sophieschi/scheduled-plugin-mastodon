@@ -1,0 +1,14 @@
+{
+    "name": "Mastodon Timeline",
+    "author": "sophie@selfnet.de and fw@dividuum.de",
+    "desc": "Shows toots from a tag timeline, based on the Twitter Module by fw@dividuum.de",
+    "nesting": {
+        "parents": ["scheduled-plugin"],
+        "childs": []
+    },
+    "platforms": ["pi/epoch-1", "pi/epoch-2"],
+    "offline": {
+        "support": "no",
+        "info": "Needs to fetch remote mastodon content"
+    }
+}
