@@ -36,16 +36,6 @@ default-font.ttf
     Apache 2.0 licenced
     https://github.com/MorbZ/OpenSansEmoji
 
-default-font-bold.ttf
-    Part of OpenSans
-    Apache 2.0 licensed
-    https://fonts.google.com/specimen/Open+Sans
-
-vue.js/juex.js
-    Part of vue.js
-    MIT licensed
-    Learn more at https://vuejs.org/
-
 package-header.jpg
     CC BY-SA 4.0
     https://docs.joinmastodon.org/elephant.svg
