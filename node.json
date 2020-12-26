@@ -22,6 +22,20 @@
         "type": "string",
         "default": "infobeamer"
     }, {
+        "title": "Filter Garbage",
+        "ui_width": 3,
+        "name": "filter_garbage",
+        "hint": "Remove toots that are crossposts from birdsite",
+        "type": "boolean",
+        "default": true
+    }, {
+        "title": "Filter toots with content warnings",
+        "ui_width": 3,
+        "name": "filter_spoilertexttoots",
+        "hint": "Remove toots that have content warnings",
+        "type": "boolean",
+        "default": false
+    }, {
         "title": "Number of toots",
         "ui_width": 3,
         "name": "count",

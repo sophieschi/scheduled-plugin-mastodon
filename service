@@ -56,9 +56,12 @@ def add_instance_to_accountname(string):
 def parse_tag_timeline(tag_timeline):
     tootlist = []
     for toot in tag_timeline:
-        #filter garbage
-        if '@twitter.com' in toot['content'] or 'nitter.net/' in toot['content']:
-            continue
+        if config.filter_garbage:
+            if '@twitter.com' in toot['content'] or 'nitter.net/' in toot['content']:
+                continue
+        if config.filter_spoilertexttoots:
+            if toot['spoiler_text']:
+                continue
         # get timestamp
         date_time_obj = datetime.strptime(toot['created_at'][0:-1], '%Y-%m-%dT%H:%M:%S.%f')
         created_at = int(time.mktime(date_time_obj.timetuple()))
