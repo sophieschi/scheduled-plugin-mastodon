@@ -11,16 +11,23 @@
         "type": "section"
     }, {
         "title": "Mastodon Instance Base URL",
-        "ui_width": 6,
+        "ui_width": 12,
         "name": "baseurl",
         "type": "string",
         "default": "https://mastodon.social"
     }, {
         "title": "Tag Query",
-        "ui_width": 3,
+        "ui_width": 12,
         "name": "tag",
         "type": "string",
         "default": "infobeamer"
+    }, {
+        "title": "Filter Accounts",
+        "ui_width": 12,
+        "name": "filter_accounts",
+        "hint": "Commaseparated list of accounts to filter out filter out from tootlist",
+        "type": "string",
+        "default": "feditrends@mastodont.cat"
     }, {
         "title": "Filter Garbage",
         "ui_width": 3,

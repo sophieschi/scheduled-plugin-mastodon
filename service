@@ -53,6 +53,10 @@ def add_instance_to_accountname(string):
 
     return string
 
+def get_blocked_account_list(string):
+    accounts_from_string = string.split(',')
+    return [item.strip() for item in accounts_from_string]
+
 def parse_tag_timeline(tag_timeline):
     tootlist = []
     for toot in tag_timeline:
@@ -61,6 +65,10 @@ def parse_tag_timeline(tag_timeline):
                 continue
         if config.filter_spoilertexttoots:
             if toot['spoiler_text']:
+                continue
+        if config.filter_accounts:
+            blocked_account_list = get_blocked_account_list(config.filter_accounts)
+            if toot['account']['acct'] in blocked_account_list:
                 continue
         # get timestamp
         date_time_obj = datetime.strptime(toot['created_at'][0:-1], '%Y-%m-%dT%H:%M:%S.%f')
