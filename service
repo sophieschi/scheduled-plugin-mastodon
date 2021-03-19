@@ -60,6 +60,8 @@ def get_blocked_account_list(string):
 def parse_tag_timeline(tag_timeline):
     tootlist = []
     for toot in tag_timeline:
+        if 'content' not in toot:
+            continue
         if config.filter_garbage:
             if '@twitter.com' in toot['content'] or 'nitter.net/' in toot['content']:
                 continue
