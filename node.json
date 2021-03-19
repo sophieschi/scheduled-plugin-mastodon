@@ -20,7 +20,8 @@
         "ui_width": 12,
         "name": "tag",
         "type": "string",
-        "default": "infobeamer"
+        "default": "infobeamer",
+        "hint": "don't put a # in there, mastodon tags are without them"
     }, {
         "title": "Filter Accounts",
         "ui_width": 12,
