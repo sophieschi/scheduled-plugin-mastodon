@@ -138,6 +138,7 @@ def cleanup(tootlist):
             'mastodon-logo.png',
             'node.png',
             'package.png',
+            'package-header.jpg'
     ]
     for toot in tootlist:
         cachelist.append(toot['account']['avatar_static'])
