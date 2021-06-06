@@ -8,6 +8,7 @@ import requests
 import pytz
 import traceback
 import time
+import sys
 from os.path import isfile, join
 from os import remove, walk, environ
 from datetime import datetime, timedelta, date
@@ -170,7 +171,7 @@ def main():
         while 1: time.sleep(100000)
     
     try:
-        not_before = datetime.strptime(config.not_before, "%Y-%m.%d").date()
+        not_before = datetime.strptime(config.not_before, "%Y-%m-%d").date()
     except ValueError:
         traceback.print_exc()
         not_before = date(1,1,1)
