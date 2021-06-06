@@ -10,7 +10,7 @@ import traceback
 import time
 from os.path import isfile, join
 from os import remove, walk, environ
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from urlparse import urlparse
 
 from hosted import config
@@ -57,7 +57,7 @@ def get_blocked_account_list(string):
     accounts_from_string = string.split(',')
     return [item.strip() for item in accounts_from_string]
 
-def parse_tag_timeline(tag_timeline):
+def parse_tag_timeline(tag_timeline, not_before):
     tootlist = []
     for toot in tag_timeline:
         if 'content' not in toot:
@@ -74,6 +74,8 @@ def parse_tag_timeline(tag_timeline):
                 continue
         # get timestamp
         date_time_obj = datetime.strptime(toot['created_at'][0:-1], '%Y-%m-%dT%H:%M:%S.%f')
+        if date_time_obj.date() < not_before:
+            continue
         created_at = int(time.mktime(date_time_obj.timetuple()))
         # get and sanitize content
         # compile all of it to new data structure
@@ -166,13 +168,22 @@ def main():
     if config.poll_interval == 0:
         print >>sys.stderr, "waiting for a config change"
         while 1: time.sleep(100000)
+    
+    try:
+        not_before = datetime.strptime(config.not_before, "%Y-%m.%d").date()
+    except ValueError:
+        traceback.print_exc()
+        not_before = date(1,1,1)
+
+    print >>sys.stderr, "not before %s" % not_before
 
     while 1:
         try:
             tag_timeline = download_tag_timeline(config.baseurl, config.tag, config.count)
-            tootlist = parse_tag_timeline(tag_timeline)
+            tootlist = parse_tag_timeline(tag_timeline, not_before)
             write_json(tootlist)
             print("got some toots, get next ones in a few minutes, doing cleanup now")
+            print(tootlist)
             cleanup(tootlist)
         except:
             traceback.print_exc()

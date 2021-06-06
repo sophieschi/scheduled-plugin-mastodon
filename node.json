@@ -56,6 +56,13 @@
         ],
         "default": 20
     }, {
+        "title": "Exlude toots before",
+        "ui_width": 3,
+        "name": "not_before",
+        "type": "string",
+        "default": "2021-01-01",
+        "hint": "Please use the YYYY-MM-DD format"
+    }, {
         "title": "Poll interval",
         "ui_width": 3,
         "name": "poll_interval",
