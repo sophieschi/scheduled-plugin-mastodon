@@ -32,11 +32,17 @@ def remove_html_markup(string):
     # of worms because we're dealing with python2.7 and unicode.
     for source, replacement in {
             '&nbsp;': ' ',
+            '&#160;': ' ',
             '&amp;': '&',
+            '&#38;': '&',
             '&gt;': '>',
+            '&#62;': '>', 
             '&lt;': '<',
+            '&#60;':  '<', 
             '&quot;': '"',
+            '&#34;': '"',
             '&apos;': '\'',
+            '&#39;': '\'',
             '<br>': ' ',
             '<br />': ' ',
             '</p><p>': ' ',
