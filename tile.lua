@@ -1,6 +1,7 @@
 local api, CHILDS, CONTENTS = ...
 
 local json = require "json"
+local utf8 = require "utf8"
 local utils = require(api.localized "utils")
 local anims = require(api.localized "anims")
 
@@ -28,14 +29,36 @@ local function wrap(str, font, size, max_w)
 
     local remaining = max_w
     local line = {}
-    for non_space in str:gmatch("%S+") do
-        local w = font:width(non_space, size)
+
+	local tokens = {}
+    for token in utf8.gmatch(str, "%S+") do
+        local w = font:width(token, size)
+        if w >= max_w then
+            while #token > 0 do
+                local cut = #token
+                for take = 1, #token do
+                    local sub_token = utf8.sub(token, 1, take)
+                    w = font:width(sub_token, size)
+                    if w >= max_w then
+                        cut = take-1
+                        break
+                    end
+                end
+                tokens[#tokens+1] = utf8.sub(token, 1, cut)
+                token = utf8.sub(token, cut+1)
+            end
+        else
+            tokens[#tokens+1] = token
+        end
+    end
+    for _, token in ipairs(tokens) do
+        local w = font:width(token, size)
         if remaining - w < 0 then
             lines[#lines+1] = table.concat(line, "")
             line = {}
             remaining = max_w
         end
-        line[#line+1] = non_space
+        line[#line+1] = token
         line[#line+1] = " "
         remaining = remaining - w - space_w
     end
