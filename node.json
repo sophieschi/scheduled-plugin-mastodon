@@ -80,6 +80,13 @@
         "hint": "Add all toots as content to the scroller",
         "type": "boolean",
         "default": true
+    }, {
+        "title": "Ignore non-media posts",
+        "ui_width": 3,
+        "name": "ignore_non_media_posts",
+        "hint": "Do not show posts which do not include any media in the tile. Non-media posts will only show up in scroller, if checked",
+        "type": "boolean",
+        "default": false
     },
     {
         "title": "Presentation",

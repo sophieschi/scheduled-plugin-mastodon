@@ -15,6 +15,7 @@ local font_size
 local margin = 10
 local text_over_under
 local profile_over_under
+local ignore_non_media_posts = false
 local logo = resource.load_image{
     file = api.localized "mastodon-logo.png"
 }
@@ -30,7 +31,7 @@ local function wrap(str, font, size, max_w)
     local remaining = max_w
     local line = {}
 
-	local tokens = {}
+    local tokens = {}
     for token in utf8.gmatch(str, "%S+") do
         local w = font:width(token, size)
         if w >= max_w then
@@ -93,15 +94,17 @@ function M.updated_tootlist_json(toots)
         end
 
         if profile then
-            playlist[#playlist+1] = {
-                acct = toot.account.acct,
-                display_name = toot.account.display_name,
-                text = toot.content,
-                profile = profile,
-                image = image,
-                created_at = toot.created_at,
-            }
-            print("toot created at" .. toot.created_at)
+            if not ignore_non_media_posts or image then
+                playlist[#playlist+1] = {
+                    acct = toot.account.acct,
+                    display_name = toot.account.display_name,
+                    text = toot.content,
+                    profile = profile,
+                    image = image,
+                    created_at = toot.created_at,
+                }
+                print("toot created at" .. toot.created_at)
+            end
             if include_in_scroller then
                 scroller[#scroller+1] = {
                     text = "@" .. toot.account.acct .. ": " .. toot.content,
@@ -126,6 +129,7 @@ function M.updated_config_json(config)
     margin = config.margin
     text_over_under = config.text_over_under
     profile_over_under = config.profile_over_under
+    ignore_non_media_posts = config.ignore_non_media_posts
 
     if config.shading > 0.0 then
         shading = resource.create_colored_texture(0,0,0,config.shading)
