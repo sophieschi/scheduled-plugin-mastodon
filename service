@@ -186,7 +186,9 @@ def main():
 
     while 1:
         try:
-            tag_timeline = download_tag_timeline(config.baseurl, config.tag, config.count)
+            tag_timeline = []
+            for tag in config.tag.split(','):
+                tag_timeline.extend(download_tag_timeline(config.baseurl, tag, config.count))
             tootlist = parse_tag_timeline(tag_timeline, not_before)
             write_json(tootlist)
             print("got some toots, get next ones in a few minutes, doing cleanup now")

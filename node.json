@@ -21,7 +21,7 @@
         "name": "tag",
         "type": "string",
         "default": "infobeamer",
-        "hint": "don't put a # in there, mastodon tags are without them"
+        "hint": "Multiple tags can be separated by commas, no spaces. Don't put a # in there, mastodon tags are without them"
     }, {
         "title": "Filter Accounts",
         "ui_width": 12,
