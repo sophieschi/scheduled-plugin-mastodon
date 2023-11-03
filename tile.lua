@@ -221,16 +221,16 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
     local function mk_content_box(x, y)
         if shading then
             local text_width = 0
-            for idx = 1, #lines do
+            for idx = 1, math.min(#lines, 8) do
                 local line = lines[idx]
                 text_width = math.max(text_width, font:width(line, font_size))
             end
             a.add(anims.moving_image_raw(S,E, shading,
-                x, y, x+text_width+2*margin, y+#lines*font_size+2*margin, 1
+                x, y, x+text_width+2*margin, y+math.min(#lines, 8)*font_size+2*margin, 1
             ))
         end
         y = y + margin
-        for idx = 1, math.min(#lines, 8)  do
+        for idx = 1, math.min(#lines, 8) do
             local line = lines[idx]
             a.add(anims.moving_font(S, E, font, x+margin, y, line, font_size,
                 toot_color.r, toot_color.g, toot_color.b, toot_color.a
@@ -239,7 +239,7 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
     end
 
     local obj = image
-    local text_height = #lines*font_size + 2*margin
+    local text_height = math.min(#lines, 8)*font_size + 2*margin
     local profile_height = font_size*1.6 + 2*margin
 
     print(boundingbox_width, boundingbox_height, text_height, text_over_under)
