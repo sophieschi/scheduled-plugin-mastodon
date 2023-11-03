@@ -230,7 +230,7 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
             ))
         end
         y = y + margin
-        for idx = 1, #lines do
+        for idx = 1, math.min(#lines, 8)  do
             local line = lines[idx]
             a.add(anims.moving_font(S, E, font, x+margin, y, line, font_size,
                 toot_color.r, toot_color.g, toot_color.b, toot_color.a
