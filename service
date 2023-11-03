@@ -114,7 +114,10 @@ def parse_tag_timeline(tag_timeline, not_before):
         if toot.get('media_attachments', None):
             for attachment in toot['media_attachments']:
                 if attachment['type'] == "image":
-                    data['media_attachment'] = cache_image(attachment['url'])
+                    if attachment['meta']['original']['width'] > 2048 or attachment['meta']['original']['height'] > 2048:
+                        data['media_attachment'] = cache_image(attachment['preview_url'])
+                    else:
+                        data['media_attachment'] = cache_image(attachment['url'])
                     break
         
         # append everythin to list
