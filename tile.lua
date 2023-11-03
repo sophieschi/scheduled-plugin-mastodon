@@ -19,7 +19,7 @@ local ignore_non_media_posts = false
 local logo = resource.load_image{
     file = api.localized "mastodon-logo.png"
 }
-local max_text_lines = 10
+local max_text_lines
 
 local playlist = {}
 
