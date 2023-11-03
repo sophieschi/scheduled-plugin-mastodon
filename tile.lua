@@ -19,7 +19,7 @@ local ignore_non_media_posts = false
 local logo = resource.load_image{
     file = api.localized "mastodon-logo.png"
 }
-local max_text_lines
+local max_text_lines = 10
 
 local playlist = {}
 
@@ -131,6 +131,7 @@ function M.updated_config_json(config)
     text_over_under = config.text_over_under
     profile_over_under = config.profile_over_under
     ignore_non_media_posts = config.ignore_non_media_posts
+    max_text_lines = config.max_text_lines
 
     if config.shading > 0.0 then
         shading = resource.create_colored_texture(0,0,0,config.shading)
