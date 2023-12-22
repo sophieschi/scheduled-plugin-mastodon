@@ -28,7 +28,7 @@
         "name": "filter_accounts",
         "hint": "Commaseparated list of accounts to filter out filter out from tootlist",
         "type": "string",
-        "default": "feditrends@mastodont.cat"
+        "default": ""
     }, {
         "title": "Filter Garbage",
         "ui_width": 3,

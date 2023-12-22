@@ -22,183 +22,221 @@ headers = {
     'Accept': 'application/json'
 }
 
-def download_tag_timeline(baseurl, tag, limit):
-    url = "{baseurl}/api/v1/timelines/tag/{tag}?limit={limit}".format(baseurl=baseurl, tag=tag, limit=limit)
-    return session.get(url, headers=headers).json()
-
-
-def remove_html_markup(string):
-    # I know, this could be done using HTMLParser - but this opens a can
-    # of worms because we're dealing with python2.7 and unicode.
-    for source, replacement in {
-            '&nbsp;': ' ',
-            '&#160;': ' ',
-            '&amp;': '&',
-            '&#38;': '&',
-            '&gt;': '>',
-            '&#62;': '>', 
-            '&lt;': '<',
-            '&#60;':  '<', 
-            '&quot;': '"',
-            '&#34;': '"',
-            '&apos;': '\'',
-            '&#39;': '\'',
-            '<br>': ' ',
-            '<br />': ' ',
-            '</p><p>': ' ',
-            }.items():
-        string = string.replace(source, replacement)
-
-    string = re.sub('<[^>]+>', '', string)
-
-    return string
-
-def add_instance_to_accountname(string):
-    o = urlparse(config.baseurl)
-    if '@' not in string:
-        string = '{}@{}'.format(string, o.netloc)
-
-    return string
-
-def get_blocked_account_list(string):
-    accounts_from_string = string.split(',')
-    return [item.strip() for item in accounts_from_string]
-
-def parse_tag_timeline(tag_timeline, not_before):
-    tootlist = []
-    seen_toots = []
-    for toot in tag_timeline:
-        if ('content' not in toot) or (toot.get('id', 0) in seen_toots):
-            continue
-        if config.filter_garbage:
-            if '@twitter.com' in toot['content'] or 'nitter.net/' in toot['content']:
-                continue
-        if config.filter_spoilertexttoots:
-            if toot['spoiler_text']:
-                continue
-        if config.filter_accounts:
-            blocked_account_list = get_blocked_account_list(config.filter_accounts)
-            if toot['account']['acct'] in blocked_account_list:
-                continue
-        # get timestamp
-        date_time_obj = datetime.strptime(toot['created_at'][0:-1], '%Y-%m-%dT%H:%M:%S.%f')
-        if date_time_obj.date() < not_before:
-            continue
-        created_at = int(time.mktime(date_time_obj.timetuple()))
-        # get and sanitize content
-        # compile all of it to new data structure
-        data = {
-              'id': toot['id'], #123456567645
-              'created_at': created_at, #"2020-12-19T13:04:57.000Z",
-              'favourites_count': toot['favourites_count'], #0
-              'content': remove_html_markup(toot['content']), #"This is some toot text without html"
-              'account': {
-                'id': toot['account']['id'],
-                'acct': toot['account']['acct'],
-                'display_name': toot['account']['display_name'], 
-                'avatar_static': cache_image(toot['account']['avatar_static']),
-              },
-              'media_attachment': ''
-              # media stuff gets filled later
-              #'media_attachments': []
-              #  {
-              #    'id': "105406994689832464",
-              #    'type': "image",
-              #    'url': "https://chaos.social/system/cache/media_attachments/files/105/406/994/689/832/464/original/7ac197f66d2cb159.jpg?1608383097"
-              #  }
-            }
-
-        data['account']['acct'] = add_instance_to_accountname(data['account']['acct'])
-        # see if media content exists 
-            # get first image attachment
-        if toot.get('media_attachments', None):
-            for attachment in toot['media_attachments']:
-                if attachment['type'] == "image":
-                    if attachment['meta']['original']['width'] > 2048 or attachment['meta']['original']['height'] > 2048:
-                        data['media_attachment'] = cache_image(attachment['preview_url'])
-                    else:
-                        data['media_attachment'] = cache_image(attachment['url'])
-                    break
-        
-        # append everythin to list
-
-        tootlist.append(data)
-        seen_toots.append(toot['id'])
-        #rinse and repeat for all toots
-
-    # output list
-    return tootlist
-
-def extract_image_name(url):
-    o = urlparse(url)
-    return o.path.split('/')[-1]
-
 def cache_image(url):
-    cache_name = extract_image_name(url)
-    if not isfile(cache_name):
-        with open(cache_name, 'wb') as i:
-            image = session.get(url)
-            i.write(image.content)
-    return cache_name
+    image_url = urlparse(url)
+    image_filename = image_url.path.split('/')[-1]
+    if not isfile(image_filename):
+        try:
+            with open(image_filename, 'wb') as f:
+                r = session.get(url)
+                r.raise_for_status()
+                f.write(r.content)
+        except Exception as e:
+            sys.stderr.write("[mastodon] exception while caching image {} - {}\n".format(url, e))
+            return None
+    return image_filename
 
-def write_json(tootlist):
-    if len(tootlist) > 0:
-        with file("tootlist.json", "wb") as f:
-            f.write(json.dumps(tootlist, ensure_ascii=False).encode("utf8"))
+class MastodonPost:
+    def __init__(self, post):
+        self.post = post
+        self.profile_image = None
+        self.attachment_image = None
 
-def cleanup(tootlist):
-    # create list of all currently needed images
-    cachelist = [
+    def _log(self, text):
+        sys.stderr.write("[mastodon] [toot {}] {}\n".format(self, text))
+
+    def __str__(self):
+        return self.post.get('id', 0)
+
+    def cache_images(self):
+        self.profile_image = cache_image(self.post['account']['avatar_static'])
+        for attachment in self.post.get('media_attachments', set()):
+            if attachment['type'] == "image":
+                if attachment['meta']['original']['width'] > 2048 or attachment['meta']['original']['height'] > 2048:
+                    self.attachment_image = cache_image(attachment['preview_url'])
+                else:
+                    self.attachment_image = cache_image(attachment['url'])
+                break
+
+    @property
+    def text(self):
+        string = self.post["content"]
+        # I know, this could be done using HTMLParser - but this opens a can
+        # of worms because we're dealing with python2.7 and unicode.
+        for source, replacement in {
+                '&nbsp;': ' ',
+                '&#160;': ' ',
+                '&amp;': '&',
+                '&#38;': '&',
+                '&gt;': '>',
+                '&#62;': '>', 
+                '&lt;': '<',
+                '&#60;':  '<', 
+                '&quot;': '"',
+                '&#34;': '"',
+                '&apos;': '\'',
+                '&#39;': '\'',
+                '<br>': ' ',
+                '<br />': ' ',
+                '</p><p>': ' ',
+                }.items():
+            string = string.replace(source, replacement)
+        string = re.sub('<[^>]+>', '', string)
+        return string
+
+    @property
+    def account_name(self):
+        acct = self.post['account']['acct']
+        if '@' not in acct:
+            baseurl = urlparse(config.baseurl)
+            return "{}@{}".format(acct, baseurl.netloc)
+        return acct
+
+    @property
+    def is_from_blocked_account(self):
+        try:
+            blocked = set()
+            with open('blocked.txt') as f:
+                for line in f.read().strip().splitlines():
+                    blocked.add(line.strip())
+            for acct in config.filter_accounts.split(','):
+                blocked.add(acct.strip())
+            if self.account_name in blocked:
+                self._log("account is in list of blocked accounts")
+                return True
+        except Exception as e:
+            self._log("Exception while checking for blocked accounts: {}".format(repr(e)))
+        return False
+
+    @property
+    def created_timestamp(self):
+        date_time_obj = datetime.strptime(self.post['created_at'][0:-1], '%Y-%m-%dT%H:%M:%S.%f')
+        return int(time.mktime(date_time_obj.timetuple()))
+
+    @property
+    def ignore_post(self):
+        if 'content' not in self.post:
+            self._log("Garbage: no content")
+            return True
+        if config.filter_garbage and ('@twitter.com' in self.post['content'] or "x.com/" in self.post["content"] or 'nitter.net/' in self.post['content']):
+            self._log("Filtered: from Twitter")
+            return True
+        if config.filter_spoilertexttoots and self.post['spoiler_text']:
+            self._log("Filtered: has spoiler")
+            return True
+        if self.is_from_blocked_account:
+            self._log("Filtered: from blocked account")
+            return True
+        return False
+
+
+class MastodonFetcher:
+    def __init__(self):
+        self.session = requests.Session()
+        self.session.headers =  {
+            'User-Agent': 'info-beamer mastodon poller serial {}'.format(environ.get('SERIAL', 'unknown')),
+            'Accept': 'application/json'
+        }
+        self.not_before = int(time.mktime(datetime.strptime(config.not_before, "%Y-%m-%d").timetuple()))
+        self.posts = []
+
+    def _log(self, something, tag=None):
+        if not isinstance(something, str):
+            something = repr(something)
+        if tag is not None:
+            something = "[#{}] {}".format(tag, something)
+        sys.stderr.write("[mastodon] {}\n".format(something))
+
+    def _fetch(self, tag):
+        self._log("starting _fetch()", tag=tag)
+        url = "{baseurl}/api/v1/timelines/tag/{tag}?limit={limit}".format(
+            baseurl=config.baseurl,
+            tag=tag,
+            limit=config.count,
+        )
+        r = session.get(url)
+        self._log("http status code was {}".format(r.status_code), tag=tag)
+        r.raise_for_status()
+        return r.json()
+
+    def fetch_and_parse(self, tag):
+        try:
+            toots = self._fetch(tag)
+            for post in toots:
+                toot = MastodonPost(post)
+                if toot in self.posts:
+                    self._log("ignoring {} because duplicate".format(toot), tag=tag)
+                    continue
+                if toot.ignore_post:
+                    # reason already printed by MastodonPost
+                    continue
+                if toot.created_timestamp < self.not_before:
+                    self._log("ignoring {} because it was created too long ago (is {}, want {})".format(toot, toot.created_timestamp, self.not_before), tag=tag)
+                self.posts.append(toot)
+        except Exception as e:
+            self._log(e, tag=tag)
+
+    def cache_and_cleanup_images(self):
+        images = {
             'mastodon-logo.png',
             'node.png',
             'package.png',
             'package-header.jpg'
-    ]
-    for toot in tootlist:
-        cachelist.append(toot['account']['avatar_static'])
-        if toot.get('media_attachment', None):
-            cachelist.append(toot['media_attachment'])
-    #print('currently needed images')
-    #print(sorted(cachelist))
-    # get all images in current directory
-    imagelist = []
-    for root, dirs, files in walk('./'):
-        for name in files:
-            if name.endswith('png') or name.endswith('jpg') or name.endswith('jpeg') or name.endswith('gif'):
-                imagelist.append(join(name))
-    #print("currently stored images")
-    #print(sorted(imagelist))
-    # delete all files which aren't in the currently needed list
-    for f in imagelist:
-        if f not in cachelist:
-            print("delete " + f)
-            remove(f)
+        }
+        to_delete = set()
+        for post in self.posts:
+            post.cache_images()
+            for path in (post.profile_image, post.attachment_image):
+                if path is not None:
+                    images.add(path)
+        for root, dirs, files in walk('./'):
+            for name in files:
+                if (
+                    name.endswith('png')
+                    or name.endswith('jpg')
+                    or name.endswith('jpeg')
+                    or name.endswith('gif')
+                ) and name not in images:
+                    to_delete.add(name)
+        for path in to_delete:
+            self._log("deleting image {} because it's not used anywhere".format(path))
+            remove(path)
+
+    def dump_json(self):
+        out = []
+        for post in self.posts:
+            out.append({
+                'created_at': post.created_timestamp,
+                'content': post.text,
+                'account': {
+                    'acct': post.account_name,
+                    'display_name': post.post['account']['display_name'],
+                    'avatar_static': post.profile_image,
+                },
+                'media_attachment': post.attachment_image or '',
+            })
+        self._log("have gotten {} posts in total".format(len(out)))
+        if len(out) > 0:
+            with open('tootlist.json', 'wb') as f:
+                f.write(json.dumps(out, ensure_ascii=False).encode('utf8'))
+            self._log("wrote {} posts to tootlist.json".format(len(out)))
+
 
 def main():
     config.restart_on_update()
 
     if config.poll_interval == 0:
         print >>sys.stderr, "waiting for a config change"
-        while 1: time.sleep(100000)
-    
-    try:
-        not_before = datetime.strptime(config.not_before, "%Y-%m-%d").date()
-    except ValueError:
-        traceback.print_exc()
-        not_before = date(1,1,1)
-
-    print >>sys.stderr, "not before %s" % not_before
+        while 1:
+            time.sleep(100000)
 
     while 1:
         try:
-            tag_timeline = []
+            poller = MastodonFetcher()
             for tag in config.tag.split(','):
-                tag_timeline.extend(download_tag_timeline(config.baseurl, tag, config.count))
-            tootlist = parse_tag_timeline(tag_timeline, not_before)
-            write_json(tootlist)
-            print("got some toots, get next ones in a few minutes, doing cleanup now")
-            print(tootlist)
-            cleanup(tootlist)
+                poller.fetch_and_parse(tag.strip())
+            poller.cache_and_cleanup_images()
+            poller.dump_json()
         except:
             traceback.print_exc()
             time.sleep(60)
