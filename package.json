@@ -1,6 +1,6 @@
 {
-    "name": "Mastodon Timeline (kunsi dev)",
-    "author": "sophie@selfnet.de and fw@dividuum.de",
+    "name": "Mastodon Timeline",
+    "author": "kunsi, sophie, dividuum",
     "desc": "Shows toots from a tag timeline, based on the Twitter Module by fw@dividuum.de",
     "nesting": {
         "parents": ["scheduled-plugin"],
