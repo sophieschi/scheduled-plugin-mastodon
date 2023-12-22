@@ -107,7 +107,7 @@ class MastodonPost:
             for acct in config.filter_accounts.split(','):
                 blocked[acct.strip()] = 'specified manually'
             if self.account_name in blocked:
-                self._log("account is blocked: {}".format(blocked[self.account_name])
+                self._log("account is blocked: {}".format(blocked[self.account_name]))
                 return True
         except Exception as e:
             self._log("Exception while checking for blocked accounts: {}".format(repr(e)))
