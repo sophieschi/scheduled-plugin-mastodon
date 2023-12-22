@@ -95,14 +95,19 @@ class MastodonPost:
     @property
     def is_from_blocked_account(self):
         try:
-            blocked = set()
+            blocked = {}
             with open('blocked.txt') as f:
                 for line in f.read().strip().splitlines():
-                    blocked.add(line.strip())
+                    line = line.strip()
+                    if '#' in line:
+                        acct, reason = line.split('#', 1)
+                    else:
+                        acct, reason = line, 'unknown'
+                    blocked[acct.strip()] = reason.strip()
             for acct in config.filter_accounts.split(','):
-                blocked.add(acct.strip())
+                blocked[acct.strip()] = 'specified manually'
             if self.account_name in blocked:
-                self._log("account is in list of blocked accounts")
+                self._log("account is blocked: {}".format(blocked[self.account_name])
                 return True
         except Exception as e:
             self._log("Exception while checking for blocked accounts: {}".format(repr(e)))
