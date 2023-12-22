@@ -87,32 +87,42 @@
         "hint": "Do not show posts which do not include any media in the tile. Non-media posts will only show up in scroller, if checked",
         "type": "boolean",
         "default": false
-    },
-    {
-        "title": "Presentation",
+    }, {
+        "title": "Fonts and Sizes",
         "type": "section"
-    },
-    {
-        "title": "Font",
-        "ui_width": 3,
-        "name": "font",
+    }, {
+        "title": "Display Name Font",
+        "ui_width": 9,
+        "name": "name_font",
         "type": "font",
-        "doc_link": true,
         "default": "default-font.ttf"
     }, {
-        "title": "Font Size",
+        "title": "Display Name Size",
         "ui_width": 3,
-        "name": "font_size",
-        "type": "select",
-        "options": [
-            [40, "40px"],
-            [50, "50px"],
-            [60, "60px"],
-            [70, "70px"],
-            [80, "80px"],
-            [90, "90px"]
-        ],
+        "name": "name_size",
+        "type": "integer",
         "default": 70
+    }, {
+        "title": "Profile Info Font",
+        "ui_width": 9,
+        "name": "info_font",
+        "type": "font",
+        "default": "default-font.ttf"
+    }, {
+        "title": "Toot Text Font",
+        "ui_width": 9,
+        "name": "text_font",
+        "type": "font",
+        "default": "default-font.ttf"
+    }, {
+        "title": "Toot Text Size",
+        "ui_width": 3,
+        "name": "text_size",
+        "type": "integer",
+        "default": 70
+    }, {
+        "title": "Presentation",
+        "type": "section"
     }, {
         "title": "Profile Color",
         "ui_width": 3,

@@ -10,8 +10,11 @@ local char_per_sec = 7
 local include_in_scroller = true
 local shading
 local toot_color, profile_color
-local font
-local font_size
+local name_font
+local info_font
+local text_font
+local name_size
+local text_size
 local margin = 10
 local text_over_under
 local profile_over_under
@@ -121,12 +124,16 @@ end
 function M.updated_config_json(config)
     print "config updated"
 
+    name_font = resource.load_font(api.localized(config.name_font.asset_name))
+    info_font = resource.load_font(api.localized(config.info_font.asset_name))
+    text_font = resource.load_font(api.localized(config.text_font.asset_name))
+    name_size = config.name_size
+    text_size = config.text_size
+
     include_in_scroller = config.include_in_scroller
     show_logo = config.show_logo
-    font = resource.load_font(api.localized(config.font.asset_name))
     toot_color = config.toot_color
     profile_color = config.profile_color
-    font_size = config.font_size
     margin = config.margin
     text_over_under = config.text_over_under
     profile_over_under = config.profile_over_under
@@ -193,37 +200,36 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
         end
         local info = "@"..toot.acct..", "..age.." ago"
 
-        local profile_image_size = font_size*1.6
+        local profile_image_size = name_size*1.6
 
         if shading then
             local profile_width = math.max(
-                font:width(name, font_size),
-                font:width(info, font_size*0.6)
+                font:width(name, name_size),
+                font:width(info, name_size*0.6)
             )
             a.add(anims.moving_image_raw(S,E, shading,
                 x, y, x+profile_image_size+profile_width+2*margin+10, y+profile_image_size+2*margin+5, 1
             ))
         end
-        a.add(anims.moving_font(S, E, font, x+profile_image_size+10+margin, y+margin, name, font_size,
+        a.add(anims.moving_font(S, E, name_font, x+profile_image_size+10+margin, y+margin, name, name_size,
             profile_color.r, profile_color.g, profile_color.b, profile_color.a
         ))
-        a.add(anims.moving_font(S, E, font, x+profile_image_size+10+margin, y+font_size+5+margin, info, font_size*0.6,
+        a.add(anims.moving_font(S, E, info_font, x+profile_image_size+10+margin, y+name_size+5+margin, info, name_size*0.6,
             profile_color.r, profile_color.g, profile_color.b, profile_color.a*0.8
         )); S=S+0.1;
-        -- a.add(anims.toot_profile(S, E, x+margin, y+margin, profile, 120))
         a.add(anims.moving_image_raw(S,E, profile,
             x+margin, y+margin, x+margin+profile_image_size+5, y+margin+profile_image_size+5, 1
         ))
     end
 
     local lines = wrap(
-        toot.text, font, font_size, boundingbox_width-2*margin
+        toot.text, text_font, text_size, boundingbox_width-2*margin
     )
 
     local actual_lines
     if image then
         actual_lines = math.min(#lines, math.floor(max_text_lines/2))
-    else 
+    else
         actual_lines = math.min(#lines, max_text_lines)
     end
 
@@ -232,24 +238,24 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
             local text_width = 0
             for idx = 1, actual_lines do
                 local line = lines[idx]
-                text_width = math.max(text_width, font:width(line, font_size))
+                text_width = math.max(text_width, text_font:width(line, text_size))
             end
             a.add(anims.moving_image_raw(S,E, shading,
-                x, y, x+text_width+2*margin, y+actual_lines*font_size+2*margin, 1
+                x, y, x+text_width+2*margin, y+actual_lines*text_size+2*margin, 1
             ))
         end
         y = y + margin
         for idx = 1, actual_lines do
             local line = lines[idx]
-            a.add(anims.moving_font(S, E, font, x+margin, y, line, font_size,
+            a.add(anims.moving_font(S, E, text_font, x+margin, y, line, text_size,
                 toot_color.r, toot_color.g, toot_color.b, toot_color.a
-            )); S=S+0.1; y=y+font_size
+            )); S=S+0.1; y=y+text_size
         end
     end
 
     local obj = image
-    local text_height = actual_lines*font_size + 2*margin
-    local profile_height = font_size*1.6 + 2*margin
+    local text_height = actual_lines*text_size + 2*margin
+    local profile_height = text_size*1.6 + 2*margin
 
     print(boundingbox_width, boundingbox_height, text_height, text_over_under)
 
@@ -292,7 +298,7 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
     else
         local text_y = math.min(
             math.max(
-                font_size*1.6+3*margin,
+                text_size*1.6+3*margin,
                 130
             ),
             boundingbox_height-text_height
