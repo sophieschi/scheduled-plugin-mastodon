@@ -1,0 +1,1 @@
+feditrends@mastodont.cat # only posts lists of the most popular hashtags
