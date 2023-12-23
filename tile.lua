@@ -73,6 +73,15 @@ local function wrap(str, font, size, max_w)
     return lines
 end
 
+local function only_contains_hashtags(text)
+    for token in utf8.gmatch(text, "%S+") do
+        if string.sub(token, 1, 1) ~= "#" then
+            return false
+        end
+    end
+    return true
+end
+
 function M.updated_tootlist_json(toots)
     playlist = {}
 
@@ -109,7 +118,7 @@ function M.updated_tootlist_json(toots)
                 }
                 print("toot created at" .. toot.created_at)
             end
-            if include_in_scroller then
+            if include_in_scroller and not only_contains_hashtags(toot.content) then
                 scroller[#scroller+1] = {
                     text = "@" .. toot.account.acct .. ": " .. toot.content,
                     image = profile,
