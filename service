@@ -174,7 +174,8 @@ class MastodonFetcher:
             r = session.get(url)
             self._log("http status code was {}".format(r.status_code), tag=tag)
             r.raise_for_status()
-            account_id = r.json().id
+            result = r.json()
+            account_id = result["id"]
 
             url = "{baseurl}/api/v1/accounts/{account_id}/statuses?limit={limit}".format(
                 baseurl=config.baseurl,
