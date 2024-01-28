@@ -164,7 +164,7 @@ class MastodonFetcher:
             self._log("http status code was {}".format(r.status_code), tag=tag)
             r.raise_for_status()
 
-        else
+        else:
 
             url = "{baseurl}/api/v1/accounts/lookup?acct={account}".format(
                 baseurl=config.baseurl,
