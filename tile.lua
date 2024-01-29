@@ -188,13 +188,13 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
 
     local age = api.clock.unix() - toot.created_at
     if age < 100 then
-        age = string.format("%ds", age)
+        age = string.format("%d Sekunden", age)
     elseif age < 3600 then
-        age = string.format("%dm", age/60)
+        age = string.format("%d Minuten", age/60)
     elseif age < 86400 then
-        age = string.format("%dh", age/3600)
+        age = string.format("%d Stunden", age/3600)
     else
-        age = string.format("%dd", age/86400)
+        age = string.format("%d Tagen", age/86400)
     end
 
     local a = anims.Area(boundingbox_width, boundingbox_height)
