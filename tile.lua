@@ -120,7 +120,7 @@ function M.updated_tootlist_json(toots)
             end
             if include_in_scroller and not only_contains_hashtags(toot.content) then
                 scroller[#scroller+1] = {
-                    text = "@" .. toot.account.acct .. ": " .. toot.content,
+                    text = toot.content,
                     image = profile,
                 }
             end
