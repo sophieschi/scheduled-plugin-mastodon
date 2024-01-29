@@ -207,7 +207,7 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
         if toot.display_name ~= '' then
             name = toot.display_name
         end
-        local info = "@"..toot.acct..", "..age.." ago"
+        local info = "@"..toot.acct..", vor "..age..""
 
         local profile_image_size = name_size*1.6
 
