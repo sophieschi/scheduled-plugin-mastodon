@@ -213,8 +213,8 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
 
         if shading then
             local profile_width = math.max(
-                font:width(name, name_size),
-                font:width(info, name_size*0.6)
+                name_font:width(name, name_size),
+                name_font:width(info, name_size*0.6)
             )
             a.add(anims.moving_image_raw(S,E, shading,
                 x, y, x+profile_image_size+profile_width+2*margin+10, y+profile_image_size+2*margin+5, 1
