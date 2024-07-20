@@ -236,10 +236,14 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
     )
 
     local actual_lines
-    if image then
-        actual_lines = math.min(#lines, math.floor(max_text_lines/2))
+    if max_text_lines > 0 then
+        if image then
+            actual_lines = math.min(#lines, math.floor(max_text_lines/2))
+        else
+            actual_lines = math.min(#lines, max_text_lines)
+        end
     else
-        actual_lines = math.min(#lines, max_text_lines)
+        actual_lines = #lines
     end
 
     local function mk_content_box(x, y)

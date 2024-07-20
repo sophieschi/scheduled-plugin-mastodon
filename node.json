@@ -190,6 +190,7 @@
         "name": "max_text_lines",
         "type": "select",
         "options": [
+            [0, "all"],
             [3, "3"],
             [5, "5"],
             [10, "10"],
