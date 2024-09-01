@@ -1,1 +1,2 @@
 feditrends@mastodont.cat # only posts lists of the most popular hashtags
+mediacccde@botsin.space # automated announcements of releases on media.ccc.de
