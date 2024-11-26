@@ -120,7 +120,7 @@ function M.updated_tootlist_json(toots)
             end
             if include_in_scroller and not only_contains_hashtags(toot.content) then
                 scroller[#scroller+1] = {
-                    text = "@" .. toot.account.acct .. ": " .. toot.content,
+                    text = toot.content,
                     image = profile,
                 }
             end
@@ -188,13 +188,13 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
 
     local age = api.clock.unix() - toot.created_at
     if age < 100 then
-        age = string.format("%ds", age)
+        age = string.format("%d Sekunden", age)
     elseif age < 3600 then
-        age = string.format("%dm", age/60)
+        age = string.format("%d Minuten", age/60)
     elseif age < 86400 then
-        age = string.format("%dh", age/3600)
+        age = string.format("%d Stunden", age/3600)
     else
-        age = string.format("%dd", age/86400)
+        age = string.format("%d Tagen", age/86400)
     end
 
     local a = anims.Area(boundingbox_width, boundingbox_height)
@@ -207,7 +207,7 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
         if toot.display_name ~= '' then
             name = toot.display_name
         end
-        local info = "@"..toot.acct..", "..age.." ago"
+        local info = "@"..toot.acct..", vor "..age..""
 
         local profile_image_size = name_size*1.6
 
