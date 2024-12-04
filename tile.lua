@@ -218,7 +218,7 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
             )
             a.add(anims.moving_image_raw(S,E, shading,
                 x, y,
-                x+profile_image_size+profile_width+2*margin+10, y+profile_image_size+2*margin+5,
+                x+profile_image_size+profile_width+2*margin+10, y+profile_image_size+2*margin,
                 1
             ))
         end
@@ -228,10 +228,11 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
             profile_color.r, profile_color.g, profile_color.b, profile_color.a
         ))
         a.add(anims.moving_font(S, E, info_font,
-            x+profile_image_size+10+margin, y+name_size+5+margin,
+            x+profile_image_size+10+margin, y+name_size+margin,
             info, name_size*0.6,
             profile_color.r, profile_color.g, profile_color.b, profile_color.a*0.8
-        )); S=S+0.1;
+        ))
+        S = S+0.1
         a.add(anims.moving_image_raw(S,E, profile,
             x+margin, y+margin,
             x+margin+profile_image_size, y+margin+profile_image_size,
