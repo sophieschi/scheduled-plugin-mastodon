@@ -217,17 +217,25 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
                 name_font:width(info, name_size*0.6)
             )
             a.add(anims.moving_image_raw(S,E, shading,
-                x, y, x+profile_image_size+profile_width+2*margin+10, y+profile_image_size+2*margin+5, 1
+                x, y,
+                x+profile_image_size+profile_width+2*margin+10, y+profile_image_size+2*margin+5,
+                1
             ))
         end
-        a.add(anims.moving_font(S, E, name_font, x+profile_image_size+10+margin, y+margin, name, name_size,
+        a.add(anims.moving_font(S, E, name_font,
+            x+profile_image_size+10+margin, y+margin,
+            name, name_size,
             profile_color.r, profile_color.g, profile_color.b, profile_color.a
         ))
-        a.add(anims.moving_font(S, E, info_font, x+profile_image_size+10+margin, y+name_size+5+margin, info, name_size*0.6,
+        a.add(anims.moving_font(S, E, info_font,
+            x+profile_image_size+10+margin, y+name_size+5+margin,
+            info, name_size*0.6,
             profile_color.r, profile_color.g, profile_color.b, profile_color.a*0.8
         )); S=S+0.1;
         a.add(anims.moving_image_raw(S,E, profile,
-            x+margin, y+margin, x+margin+profile_image_size+5, y+margin+profile_image_size+5, 1
+            x+margin, y+margin,
+            x+margin+profile_image_size, y+margin+profile_image_size,
+            1
         ))
     end
 
@@ -254,21 +262,27 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
                 text_width = math.max(text_width, text_font:width(line, text_size))
             end
             a.add(anims.moving_image_raw(S,E, shading,
-                x, y, x+text_width+2*margin, y+actual_lines*text_size+2*margin, 1
+                x, y,
+                x+text_width+2*margin, y+actual_lines*text_size+2*margin,
+                1
             ))
         end
         y = y + margin
         for idx = 1, actual_lines do
             local line = lines[idx]
-            a.add(anims.moving_font(S, E, text_font, x+margin, y, line, text_size,
+            a.add(anims.moving_font(S, E, text_font,
+                x+margin, y,
+                line, text_size,
                 toot_color.r, toot_color.g, toot_color.b, toot_color.a
-            )); S=S+0.1; y=y+text_size
+            ))
+            S = S+0.1
+            y = y+text_size
         end
     end
 
     local obj = image
     local text_height = actual_lines*text_size + 2*margin
-    local profile_height = text_size*1.6 + 2*margin
+    local profile_height = text_size*1.6 + 2*margin + 5
 
     print(boundingbox_width, boundingbox_height, text_height, text_over_under)
 
@@ -279,18 +293,18 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
         local profile_y
 
         if text_over_under == "under" then
-            remaining_height_for_image = remaining_height_for_image - text_height - margin
+            remaining_height_for_image = remaining_height_for_image - text_height - 2*margin
         end
 
         if profile_over_under == "under" or profile_over_under == "over" then
-            remaining_height_for_image = remaining_height_for_image - profile_height - margin
+            remaining_height_for_image = remaining_height_for_image - profile_height - 2*margin
         end
 
         local x1, y1, x2, y2 = util.scale_into(boundingbox_width, remaining_height_for_image, width, height)
 
         if profile_over_under == "over" then
-            y1 = y1 + profile_height + margin
-            y2 = y2 + profile_height + margin
+            y1 = y1 + profile_height + 2*margin
+            y2 = y2 + profile_height + 2*margin
         end
 
         print(x1, y1, x2, y2)
@@ -300,11 +314,11 @@ function M.task(starts, ends, config, x1, y1, x2, y2)
         mk_content_box(0, boundingbox_height - text_height)
 
         if profile_over_under == "under" then
-            profile_y = boundingbox_height - text_height - profile_height - margin
+            profile_y = boundingbox_height - text_height - profile_height - 4*margin
         elseif profile_over_under == "over" then
             profile_y = 0
         else
-            profile_y = 10
+            profile_y = margin
         end
 
         mk_profile_box(0, profile_y)
