@@ -154,14 +154,37 @@ class MastodonFetcher:
 
     def _fetch(self, tag):
         self._log("starting _fetch()", tag=tag)
-        url = "{baseurl}/api/v1/timelines/tag/{tag}?limit={limit}".format(
-            baseurl=config.baseurl,
-            tag=tag,
-            limit=config.count,
-        )
-        r = session.get(url)
-        self._log("http status code was {}".format(r.status_code), tag=tag)
-        r.raise_for_status()
+        if tag[0] != "@":
+            url = "{baseurl}/api/v1/timelines/tag/{tag}?limit={limit}".format(
+                baseurl=config.baseurl,
+                tag=tag,
+                limit=config.count,
+            )
+            r = session.get(url)
+            self._log("http status code was {}".format(r.status_code), tag=tag)
+            r.raise_for_status()
+
+        else:
+
+            url = "{baseurl}/api/v1/accounts/lookup?acct={account}".format(
+                baseurl=config.baseurl,
+                account=tag,
+                limit=config.count,
+            )
+            r = session.get(url)
+            self._log("http status code was {}".format(r.status_code), tag=tag)
+            r.raise_for_status()
+            result = r.json()
+            account_id = result["id"]
+
+            url = "{baseurl}/api/v1/accounts/{account_id}/statuses?limit={limit}".format(
+                baseurl=config.baseurl,
+                account_id=account_id,
+                limit=config.count,
+            )
+            r = session.get(url)
+            self._log("http status code was {}".format(r.status_code), tag=tag)
+            r.raise_for_status()
         return r.json()
 
     def fetch_and_parse(self, tag):
