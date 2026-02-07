@@ -16,12 +16,19 @@ from urlparse import urlparse
 
 from hosted import config
 
+class BearerAuth(requests.auth.AuthBase):
+    def __init__(self, token):
+        self.token = token
+    def __call__(self, r):
+        r.headers["Authorization"] = "Bearer " + self.token
+        return r
+
 session = requests.Session()
-headers = {
+session.headers = {
     'User-Agent': 'info-beamer mastodon poller serial {}'.format(environ.get('SERIAL', 'unknown')),
     'Accept': 'application/json',
-    'Authorization': 'Bearer {}'.format(config.accesstoken),
 }
+session.auth =  BearerAuth(config.accesstoken)
 
 def cache_image(url):
     image_url = urlparse(url)
@@ -142,8 +149,8 @@ class MastodonFetcher:
         self.session.headers =  {
             'User-Agent': 'info-beamer mastodon poller serial {}'.format(environ.get('SERIAL', 'unknown')),
             'Accept': 'application/json',
-            'Authorization': 'Bearer {}'.format(config.accesstoken),
         }
+        self.session.auth =  BearerAuth(config.accesstoken)
         self.not_before = int(time.mktime(datetime.strptime(config.not_before, "%Y-%m-%d").timetuple()))
         self.posts = []
 
