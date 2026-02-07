@@ -3,9 +3,6 @@
     "permissions": {
         "network": "Needs to access public API of a Mastodon instance"
     },
-    "deferred": [
-        "content.lua"
-    ],
     "options": [{
         "title": "Mastodon Tag Timeline",
         "type": "section"
@@ -15,6 +12,13 @@
         "name": "baseurl",
         "type": "string",
         "default": "https://mastodon.social"
+    }, {
+        "title": "Mastodon Access Token",
+        "ui_width": 12,
+        "name": "accesstoken",
+        "type": "string",
+        "default": "insert_your_access_token_here"
+        "hint": "Obtain an access token from your mastodon instance, see https://docs.joinmastodon.org/client/authorized/#token"
     }, {
         "title": "Tag Query",
         "ui_width": 12,
@@ -200,6 +204,7 @@
         "default": "10"
     }],
     "deferred": [
-        "tile.lua"
-    ]
+        "tile.lua",
+        "content.lua"
+    ],
 }

@@ -19,7 +19,8 @@ from hosted import config
 session = requests.Session()
 headers = {
     'User-Agent': 'info-beamer mastodon poller serial {}'.format(environ.get('SERIAL', 'unknown')),
-    'Accept': 'application/json'
+    'Accept': 'application/json',
+    'Authorization': 'Bearer {}'.format(config.accesstoken),
 }
 
 def cache_image(url):
@@ -140,7 +141,8 @@ class MastodonFetcher:
         self.session = requests.Session()
         self.session.headers =  {
             'User-Agent': 'info-beamer mastodon poller serial {}'.format(environ.get('SERIAL', 'unknown')),
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Authorization': 'Bearer {}'.format(config.accesstoken),
         }
         self.not_before = int(time.mktime(datetime.strptime(config.not_before, "%Y-%m-%d").timetuple()))
         self.posts = []
