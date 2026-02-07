@@ -162,6 +162,8 @@ class MastodonFetcher:
             limit=config.count,
         )
         r = session.get(url)
+        self._log(self.session.headers, tag=tag)
+        self._log(r.json(), tag=tag)
         self._log("http status code was {}".format(r.status_code), tag=tag)
         r.raise_for_status()
         return r.json()
