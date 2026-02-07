@@ -17,7 +17,7 @@
         "ui_width": 12,
         "name": "accesstoken",
         "type": "string",
-        "default": "insert_your_access_token_here"
+        "default": "insert_your_access_token_here",
         "hint": "Obtain an access token from your mastodon instance, see https://docs.joinmastodon.org/client/authorized/#token"
     }, {
         "title": "Tag Query",
@@ -206,5 +206,5 @@
     "deferred": [
         "tile.lua",
         "content.lua"
-    ],
+    ]
 }
