@@ -30,6 +30,21 @@ session.headers = {
 }
 session.auth =  BearerAuth(config.accesstoken)
 
+BLOCKED_ACCOUNTS = {}
+with open('blocked.txt') as f:
+    for line in f.read().strip().splitlines():
+        line = line.strip()
+        if '#' in line:
+            acct, reason = line.split('#', 1)
+        else:
+            acct, reason = line, 'unknown'
+        BLOCKED_ACCOUNTS[acct.strip()] = reason.strip()
+for acct in config.filter_accounts.split(','):
+    BLOCKED_ACCOUNTS[acct.strip()] = 'specified manually'
+
+BLOCKED_DOMAINS = [i.strip() for i in config.filter_domains.split(',') if i.strip()]
+BLOCKED_HASHTAGS = [i.strip() for i in config.filter_hashtags.split(',') if i.strip()]
+
 def cache_image(url):
     image_url = urlparse(url)
     image_filename = image_url.path.split('/')[-1]
@@ -101,24 +116,17 @@ class MastodonPost:
         return acct
 
     @property
-    def is_from_blocked_account(self):
-        try:
-            blocked = {}
-            with open('blocked.txt') as f:
-                for line in f.read().strip().splitlines():
-                    line = line.strip()
-                    if '#' in line:
-                        acct, reason = line.split('#', 1)
-                    else:
-                        acct, reason = line, 'unknown'
-                    blocked[acct.strip()] = reason.strip()
-            for acct in config.filter_accounts.split(','):
-                blocked[acct.strip()] = 'specified manually'
-            if self.account_name in blocked:
-                self._log("account is blocked: {}".format(blocked[self.account_name]))
+    def is_blocked(self):
+        if self.account_name in BLOCKED_ACCOUNTS:
+            self._log("account is blocked: {}".format(BLOCKED_ACCOUNTS[self.account_name]))
+            return True
+        if self.account_name.split('@', 1)[1] in BLOCKED_DOMAINS:
+            self._log("account domain is blocked: {}".format(self.account_name.split('@', 1)[1]])
+            return True
+        for hashtag in BLOCKED_HASHTAGS:
+            if '#{}'.format(hashtag) in self.text:
+                self._log("toot contains blocked hashtag: #{}".format(hashtag))
                 return True
-        except Exception as e:
-            self._log("Exception while checking for blocked accounts: {}".format(repr(e)))
         return False
 
     @property
@@ -137,8 +145,8 @@ class MastodonPost:
         if config.filter_spoilertexttoots and self.post['spoiler_text']:
             self._log("Filtered: has spoiler")
             return True
-        if self.is_from_blocked_account:
-            self._log("Filtered: from blocked account")
+        if self.is_blocked:
+            self._log("Filtered: blocked account/domain/hashtag")
             return True
         return False
 
